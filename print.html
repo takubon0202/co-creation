@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Cafe Foam 印刷用マニュアル</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Inter:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-primary: #2d2a26;
+            --text-secondary: #50473f;
+            --border: #d9d3ca;
+            --bg: #ffffff;
+            --accent: #8b6914;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 12mm;
+            font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+            color: var(--text-primary);
+            background: var(--bg);
+            line-height: 1.7;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', 'Zen Kaku Gothic New', serif;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+        }
+        h1 { font-size: 2.1rem; }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.3rem; margin-top: 1.4rem; }
+        h3 { font-size: 1.25rem; margin-top: 1rem; }
+        h4 { font-size: 1.05rem; margin-top: 0.8rem; }
+        p { margin: 0 0 0.6rem 0; }
+        ul { margin: 0.2rem 0 0.8rem 1.2rem; padding: 0; }
+        li { margin: 0.1rem 0 0.2rem 0; }
+        .section {
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .card {
+            border: 1px solid var(--border);
+            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.9rem;
+            background: #fff;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.8rem;
+        }
+        .menu-head {
+            display: flex;
+            gap: 0.6rem;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+        .price {
+            font-family: 'Inter', 'Zen Kaku Gothic New', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            font-variant-numeric: tabular-nums;
+            color: var(--accent);
+        }
+        .meta { color: var(--text-secondary); font-size: 0.95rem; }
+        .steps ol { margin: 0.2rem 0 0.6rem 1.2rem; padding: 0; }
+        .steps li { margin: 0.1rem 0 0.2rem 0; }
+        .badge {
+            display: inline-block;
+            padding: 0.1rem 0.45rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-right: 0.3rem;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.8rem;
+        }
+        .mb-0 { margin-bottom: 0; }
+        .mt-0 { margin-top: 0; }
+        .small { font-size: 0.92rem; color: var(--text-secondary); }
+        @media print {
+            body { margin: 10mm; }
+            .page-break { page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+    <header style="margin-bottom: 1rem;">
+        <h1>Cafe Foam 印刷用マニュアル</h1>
+        <p class="small">このページは印刷・PDF出力専用です（通常Web表示は index.html を使用）。</p>
+    </header>
+
+    <main id="printRoot"></main>
+
+    <script src="data.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const root = document.getElementById('printRoot');
+        renderMenus(root);
+        renderCleaning(root);
+        renderTroubleshooting(root);
+        renderHygiene(root);
+        renderService(root);
+        renderAirpay(root);
+    });
+
+    function renderSection(root, title, contentEl, opts = {}) {
+        const sec = document.createElement('section');
+        sec.className = 'section';
+        if (opts.pageBreak) sec.classList.add('page-break');
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        sec.appendChild(h2);
+        sec.appendChild(contentEl);
+        root.appendChild(sec);
+    }
+
+    function renderMenus(root) {
+        const container = document.createElement('div');
+        Object.entries(groupByCategory(initialData.menu)).forEach(([cat, items]) => {
+            const catCard = document.createElement('div');
+            catCard.className = 'card';
+            const h3 = document.createElement('h3');
+            h3.textContent = cat.replace('ラテメニュー', 'ラテ');
+            catCard.appendChild(h3);
+
+            items.forEach(menu => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const head = document.createElement('div');
+                head.className = 'menu-head';
+                const title = document.createElement('h4');
+                title.textContent = menu.name;
+                const price = document.createElement('span');
+                price.className = 'price';
+                price.textContent = menu.price ? `${menu.price}円` : '価格未設定';
+                head.append(title, price);
+                card.appendChild(head);
+
+                const meta = document.createElement('p');
+                meta.className = 'meta';
+                meta.textContent = `${menu.volume || ''} ／ ${menu.duration || ''}`;
+                card.appendChild(meta);
+
+                const badges = document.createElement('div');
+                badges.className = 'small';
+                badges.innerHTML = `<span class="badge">${menu.englishName || menu.id}</span><span class="badge">${cat.replace('ラテメニュー','ラテ')}</span>`;
+                card.appendChild(badges);
+
+                const ing = document.createElement('div');
+                ing.innerHTML = `<strong>材料:</strong> ${menu.ingredients.join('、')}`;
+                card.appendChild(ing);
+
+                const eq = document.createElement('div');
+                eq.innerHTML = `<strong>器具:</strong> ${menu.equipment.join('、')}`;
+                card.appendChild(eq);
+
+                if (menu.steps?.length) {
+                    const steps = document.createElement('div');
+                    steps.className = 'steps';
+                    steps.innerHTML = '<strong>作り方:</strong>';
+                    const ol = document.createElement('ol');
+                    menu.steps.forEach(s => {
+                        const li = document.createElement('li');
+                        li.textContent = `${s.title ? s.title + '：' : ''}${s.description}`;
+                        ol.appendChild(li);
+                    });
+                    steps.appendChild(ol);
+                    card.appendChild(steps);
+                }
+
+                if (menu.warnings?.length) {
+                    const warn = document.createElement('div');
+                    warn.innerHTML = '<strong>注意:</strong>';
+                    const ul = document.createElement('ul');
+                    menu.warnings.forEach(w => {
+                        const li = document.createElement('li');
+                        li.textContent = w;
+                        ul.appendChild(li);
+                    });
+                    warn.appendChild(ul);
+                    card.appendChild(warn);
+                }
+
+                if (menu.qualityStandards?.length) {
+                    const q = document.createElement('div');
+                    q.innerHTML = '<strong>品質基準:</strong>';
+                    const ul = document.createElement('ul');
+                    menu.qualityStandards.forEach(w => {
+                        const li = document.createElement('li');
+                        li.textContent = w;
+                        ul.appendChild(li);
+                    });
+                    q.appendChild(ul);
+                    card.appendChild(q);
+                }
+
+                if (menu.variations?.length) {
+                    const v = document.createElement('div');
+                    v.innerHTML = '<strong>バリエーション:</strong>';
+                    const ul = document.createElement('ul');
+                    menu.variations.forEach(w => {
+                        const li = document.createElement('li');
+                        li.textContent = w;
+                        ul.appendChild(li);
+                    });
+                    v.appendChild(ul);
+                    card.appendChild(v);
+                }
+
+                container.appendChild(card);
+            });
+            container.appendChild(catCard);
+        });
+        renderSection(root, 'メニュー一覧（印刷用）', container, { pageBreak: true });
+    }
+
+    function renderCleaning(root) {
+        const wrap = document.createElement('div');
+        ['daily','weekly','monthly'].forEach(period => {
+            const data = initialData.cleaning[period];
+            const card = document.createElement('div');
+            card.className = 'card';
+            const h3 = document.createElement('h3');
+            h3.textContent = data.name;
+            card.appendChild(h3);
+            if (data.description) {
+                const p = document.createElement('p');
+                p.textContent = data.description;
+                card.appendChild(p);
+            }
+            if (data.warnings?.length) {
+                const w = document.createElement('div');
+                w.innerHTML = '<strong>注意:</strong>';
+                const ul = document.createElement('ul');
+                data.warnings.forEach(t => { const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+                w.appendChild(ul);
+                card.appendChild(w);
+            }
+            if (data.tasks?.length) {
+                const ul = document.createElement('ul');
+                data.tasks.forEach(t => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${t.title}</strong>：${t.description}`;
+                    if (t.notes?.length) {
+                        const sub = document.createElement('ul');
+                        t.notes.forEach(n => { const li2=document.createElement('li'); li2.textContent=n; sub.appendChild(li2); });
+                        li.appendChild(sub);
+                    }
+                    ul.appendChild(li);
+                });
+                card.appendChild(ul);
+            }
+            wrap.appendChild(card);
+        });
+        renderSection(root, '清掃マニュアル（印刷用）', wrap, { pageBreak: true });
+    }
+
+    function renderTroubleshooting(root) {
+        const wrap = document.createElement('div');
+        initialData.troubleshooting.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${item.title}</h3><p class="mb-0"><strong>問題:</strong> ${item.problem}</p>`;
+            if (item.solutions?.length) {
+                const ul = document.createElement('ul');
+                item.solutions.forEach(s => { const li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
+                card.appendChild(ul);
+            }
+            wrap.appendChild(card);
+        });
+        renderSection(root, 'トラブルシューティング（印刷用）', wrap, { pageBreak: true });
+    }
+
+    function renderHygiene(root) {
+        const wrap = document.createElement('div');
+        ['staff','manager'].forEach(key => {
+            const data = initialData.hygiene[key];
+            const card = document.createElement('div');
+            card.className = 'card';
+            const h3 = document.createElement('h3');
+            h3.textContent = data.title;
+            card.appendChild(h3);
+            if (data.subtitle) {
+                const p = document.createElement('p');
+                p.className = 'small';
+                p.textContent = data.subtitle;
+                card.appendChild(p);
+            }
+            if (data.description) {
+                const p = document.createElement('p');
+                p.textContent = data.description;
+                card.appendChild(p);
+            }
+            if (data.sections?.length) {
+                data.sections.forEach(sec => {
+                    const s = document.createElement('div');
+                    const h4 = document.createElement('h4');
+                    h4.textContent = sec.title;
+                    s.appendChild(h4);
+                    if (sec.items) {
+                        const ul = document.createElement('ul');
+                        sec.items.forEach(it => { const li=document.createElement('li'); li.textContent=it; ul.appendChild(li); });
+                        s.appendChild(ul);
+                    }
+                    if (sec.subsections) {
+                        sec.subsections.forEach(sub => {
+                            const subH = document.createElement('div');
+                            subH.innerHTML = `<strong>${sub.subtitle}</strong>`;
+                            const ul = document.createElement('ul');
+                            sub.items.forEach(it => { const li=document.createElement('li'); li.textContent=it; ul.appendChild(li); });
+                            subH.appendChild(ul);
+                            s.appendChild(subH);
+                        });
+                    }
+                    card.appendChild(s);
+                });
+            }
+            wrap.appendChild(card);
+        });
+        renderSection(root, '衛生マニュアル（印刷用）', wrap, { pageBreak: true });
+    }
+
+    function renderService(root) {
+        const data = initialData.service;
+        const wrap = document.createElement('div');
+        if (data.customerService) {
+            const cs = data.customerService;
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${cs.title}</h3>`;
+            if (cs.flow?.length) {
+                const ol = document.createElement('ol');
+                cs.flow.forEach(i => { const li=document.createElement('li'); li.textContent=i; ol.appendChild(li); });
+                const h = document.createElement('h4'); h.textContent = '接客フロー（基本）';
+                card.appendChild(h); card.appendChild(ol);
+            }
+            if (cs.basics?.length) {
+                const ul = document.createElement('ul');
+                cs.basics.forEach(i => { const li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+                const h = document.createElement('h4'); h.textContent = '接客の基本姿勢';
+                card.appendChild(h); card.appendChild(ul);
+            }
+            const cautions = cs.cautions || {};
+            const blocks = [
+                ['接客時のNG行動', cautions.ng],
+                ['衛生・身だしなみの注意', cautions.hygiene],
+                ['オーダー・提供時の注意', cautions.order],
+                ['クレーム・トラブル対応の注意', cautions.claim],
+            ];
+            blocks.forEach(([title, list]) => {
+                if (!list || !list.length) return;
+                const ul = document.createElement('ul');
+                list.forEach(i => { const li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+                const h = document.createElement('h4'); h.textContent = title;
+                card.appendChild(h); card.appendChild(ul);
+            });
+            wrap.appendChild(card);
+        }
+
+        const sections = [
+            ['概要', data.overview?.content],
+            ['店内動線・レイアウト', data.layout?.flow],
+            ['座席構成', data.layout?.seats],
+            ['設備配置', data.facilities?.items?.map(i => `${i.equipment}／${i.quantity}／${i.location}／${i.notes}`)],
+            ['役割分担', data.roles?.staff?.flatMap(r => [`【${r.position}】`, ...(r.responsibilities||[])] )],
+            ['番号札運用', data.numberTag?.flow?.map(f => `${f.step}: ${f.description}`)],
+            ['トレー運用', data.tray?.operations?.map(o => `${o.action}: ${o.procedure}（${o.tips}）`)],
+            ['返却口運用', data.returnCounter?.operations],
+            ['混雑時の運用', data.congestion?.scenarios?.map(s => `${s.situation}: ${s.action}`)],
+            ['掲示物・サイン', data.signage?.signs?.map(s => `${s.location}: ${s.text}`)],
+            ['チェックリスト: 開店前', data.checklist?.periods?.find(p=>p.period==='開店前')?.items],
+            ['チェックリスト: 営業中', data.checklist?.periods?.find(p=>p.period==='営業中')?.items],
+            ['チェックリスト: 閉店後', data.checklist?.periods?.find(p=>p.period==='閉店後')?.items],
+        ];
+        sections.forEach(([title, list]) => {
+            if (!list || !list.length) return;
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${title}</h3>`;
+            const ul = document.createElement('ul');
+            list.forEach(item => { const li=document.createElement('li'); li.textContent=item; ul.appendChild(li); });
+            card.appendChild(ul);
+            wrap.appendChild(card);
+        });
+        renderSection(root, '提供方法（印刷用）', wrap, { pageBreak: true });
+    }
+
+    function renderAirpay(root) {
+        const data = initialData.airpay;
+        const wrap = document.createElement('div');
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${data.title || 'AirPay マニュアル'}</h3><p class="small">${data.device || ''}</p>`;
+        if (data.methods?.length) {
+            data.methods.forEach(m => {
+                const b = document.createElement('div');
+                b.innerHTML = `<strong>${m.name}</strong>`;
+                if (m.steps) {
+                    const ol = document.createElement('ol');
+                    m.steps.forEach(s => { const li=document.createElement('li'); li.textContent=s; ol.appendChild(li); });
+                    b.appendChild(ol);
+                }
+                if (m.notes) {
+                    const ul = document.createElement('ul');
+                    m.notes.forEach(s => { const li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
+                    b.appendChild(ul);
+                }
+                card.appendChild(b);
+            });
+        }
+        if (data.checklist?.length) {
+            const ul = document.createElement('ul');
+            data.checklist.forEach(i => { const li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+            card.appendChild(document.createElement('hr'));
+            const h = document.createElement('strong'); h.textContent = 'チェックリスト';
+            card.appendChild(h);
+            card.appendChild(ul);
+        }
+        if (data.cautions?.length) {
+            const ul = document.createElement('ul');
+            data.cautions.forEach(i => { const li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+            card.appendChild(document.createElement('hr'));
+            const h = document.createElement('strong'); h.textContent = '注意事項';
+            card.appendChild(h);
+            card.appendChild(ul);
+        }
+        if (data.troubles?.length) {
+            const ul = document.createElement('ul');
+            data.troubles.forEach(i => { const li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+            card.appendChild(document.createElement('hr'));
+            const h = document.createElement('strong'); h.textContent = 'トラブル対応';
+            card.appendChild(h);
+            card.appendChild(ul);
+        }
+        wrap.appendChild(card);
+        renderSection(root, '決済・AirPay（印刷用）', wrap, { pageBreak: true });
+    }
+
+    function groupByCategory(menuObj) {
+        const map = {};
+        Object.values(menuObj).forEach(m => {
+            const key = m.category || 'その他';
+            if (!map[key]) map[key] = [];
+            map[key].push(m);
+        });
+        return map;
+    }
+    </script>
+</body>
+</html>
+
